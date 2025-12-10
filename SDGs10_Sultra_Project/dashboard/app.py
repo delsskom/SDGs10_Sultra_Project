@@ -60,16 +60,31 @@ else:
     st.info("Dataset ini tidak memiliki kombinasi kolom kategori & numerik yang cocok untuk bar chart.")
 
 # ===========================
-# PLOT 2 — Line Chart
+# PLOT 2 — Pie Chart
 # ===========================
-st.write("### 📈 Line Chart")
+st.write("### 🥧 Pie Chart")
 
-if len(numeric_cols) >= 1:
-    line_col = st.selectbox("Pilih variabel numerik:", numeric_cols, key="line")
-    line_fig = px.line(df, y=line_col, title=f"Perubahan {line_col}")
-    st.plotly_chart(line_fig, use_container_width=True)
+# Pie Chart: cek kolom kategori & numerik
+if len(category_cols) >= 1 and len(numeric_cols) >= 1:
+    value_col = st.selectbox("Pilih variabel numerik (values):", numeric_cols, key="pie_value")
+    category_col = st.selectbox("Pilih variabel kategori (labels):", category_cols, key="pie_label")
+    
+    pie_fig = px.pie(df, names=category_col, values=value_col, 
+                     title=f"Distribusi {value_col} berdasarkan {category_col}")
+    st.plotly_chart(pie_fig, use_container_width=True)
+
+# Fallback: dataset hanya punya kolom numerik
+elif len(numeric_cols) >= 1:
+    value_col = st.selectbox("Pilih kolom numerik untuk pie chart:", numeric_cols, key="pie_only_num")
+    pie_data = df[value_col].value_counts().reset_index()
+    pie_data.columns = [value_col, "count"]
+    
+    pie_fig = px.pie(pie_data, names=value_col, values="count",
+                     title=f"Distribusi frekuensi nilai {value_col}")
+    st.plotly_chart(pie_fig, use_container_width=True)
+
 else:
-    st.info("Dataset tidak memiliki kolom numerik untuk line chart.")
+    st.info("Dataset tidak memiliki kolom numerik untuk pie chart.")
 
 # ===========================
 # PLOT 3 — Correlation Heatmap
